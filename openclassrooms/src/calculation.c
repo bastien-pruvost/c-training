@@ -1,9 +1,3 @@
-int doubleNumber(int number)
-{
-    return 2 * number;
-}
+int doubleNumber(int number) { return 2 * number; }
 
-void tripleNumber(int *numberPointer)
-{
-    *numberPointer *= 3;
-}
+void tripleNumber(int *numberPointer) { *numberPointer *= 3; }
