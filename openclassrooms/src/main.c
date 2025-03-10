@@ -1,12 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include "buffer.h"
 #include "calculation.h"
+#include "linked-list.h"
 #include "user.h"
 #include "utils.h"
 
-#define USER_COUNT 2
-#define MAX_STR_LENGTH 99
+#define USER_COUNT 1
+#define MAX_STR_LENGTH 255
+
+void prompt_user_str(char *str, int length);
 
 int main(int argc, char *argv[]) {
   (void)argc;
@@ -168,37 +173,159 @@ int main(int argc, char *argv[]) {
 
   // ---------------------------------------------------------------------------------
 
-  // Files (defined in users.h)
-  printf("\n--- Work with files ---\n");
+  // Write in a file
+  printf("\n--- Write in a file ---\n");
 
-  FILE *file = NULL;
+  FILE *file_write = NULL;
 
-  file = fopen("assets/test.txt", "a");
+  file_write = fopen("assets/write.txt", "a");
 
-  if (file == NULL) {
-    printf("Unable to open file %s", "assets/test.txt");
-    return 1;
+  if (file_write == NULL) {
+    printf("Unable to open file %s", "assets/write.txt");
+    return EXIT_FAILURE;
   }
 
   // Write a char in the file
-  fputc('\n', file);
+  fputc('\n', file_write);
   // Write a char in the file
-  fputc('B', file);
+  fputc('B', file_write);
 
   // Write a string in the file
-  fputs("\nSalut les développeurs\nBienvenue sur OpenClassrooms !", file);
+  fputs("\nSalut les développeurs\nBienvenue sur OpenClassrooms !", file_write);
 
   for (int i = 0; i < USER_COUNT; i++) {
     if (users[i].role == ADMIN) {
       // Write a formatted string in the file
-      fprintf(file, "\nUser %d (%s) is admin !", i + 1, users[i].firstname);
+      fprintf(file_write, "\nUser %d (%s) is admin !", i + 1,
+              users[i].firstname);
     } else {
       // Write a formatted string in the file
-      fprintf(file, "\nUser %d (%s) is NOT admin !", i + 1, users[i].firstname);
+      fprintf(file_write, "\nUser %d (%s) is NOT admin !", i + 1,
+              users[i].firstname);
     }
   }
 
-  fclose(file);
+  fclose(file_write);
 
-  return 0;
+  // ---------------------------------------------------------------------------------
+
+  // Read a file
+  printf("\n--- Read a file ---\n");
+
+  // Read char
+  FILE *file_read_char = NULL;
+
+  file_read_char = fopen("assets/read.txt", "r");
+
+  if (file_read_char == NULL) {
+    printf("Unable to open file %s", "assets/read.txt");
+    return EXIT_FAILURE;
+  }
+
+  char character = fgetc(file_read_char);  // fgetc read ONE char
+
+  while (character != EOF) {  // EOF = End of file
+    printf("%c", character);
+    character = fgetc(file_read_char);
+  }
+
+  fclose(file_read_char);
+
+  // Read string
+  FILE *file_read_str = NULL;
+  file_read_str = fopen("assets/read.txt", "r");
+
+  char string[MAX_STR_LENGTH] = "";
+
+  while (fgets(string, MAX_STR_LENGTH, file_read_str) != NULL) {
+    printf("%s", string);
+  }
+
+  fclose(file_read_str);
+
+  // Read formatted string
+  FILE *file_read_formatted_str = NULL;
+  file_read_formatted_str = fopen("assets/scores.txt", "r");
+  int scores[3] = {0};
+
+  while (fscanf(file_read_formatted_str, "%d, %d, %d", &scores[0], &scores[1],
+                &scores[2]) != 0) {
+    printf("Les scores sont : %d, %d et %d\n", scores[0], scores[1], scores[2]);
+    printf("Curseur: %ld\n", ftell(file_read_formatted_str));
+  }
+
+  // ---------------------------------------------------------------------------------
+
+  // Memory allocation
+  printf("\n--- Memory allocation ---\n");
+
+  int friends_count = 0;
+  printf("How much friend: ");
+  scanf("%d", &friends_count);
+
+  int *int_arr = malloc(friends_count * sizeof(int));
+
+  if (int_arr == NULL) {
+    perror("Memory error in int_arr");
+    return EXIT_FAILURE;
+  }
+
+  for (int i = 0; i < friends_count; i++) {
+    printf("Enter age of friend %d: ", i + 1);
+    scanf("%d", &(int_arr[i]));
+  }
+
+  for (int i = 0; i < friends_count; i++) {
+    printf("Friend %d is %d years old !\n", i + 1, int_arr[i]);
+  }
+
+  free(int_arr);
+
+  // ---------------------------------------------------------------------------------
+
+  // Strings security
+  printf("\n--- Strings security ---\n");
+
+  clearBuffer();
+
+  char safe_name[20];
+  int safe_age;
+
+  getString(safe_name, sizeof(safe_name), "Enter your name: ");
+  safe_age = getInt("Enter your age: ");
+
+  printf("Hello, %s! You are %d years old.\n", safe_name, safe_age);
+
+  // ---------------------------------------------------------------------------------
+
+  // Linked lists
+  printf("\n--- Linked lists ---\n");
+
+  LinkedList *list = createList();
+  if (!list) return EXIT_FAILURE;
+
+  insertAtBeginning(list, 30);
+  insertAtBeginning(list, 20);
+  insertAtBeginning(list, 10);
+
+  printList(list);
+
+  insertAtEnd(list, 50);
+  insertAtEnd(list, 60);
+
+  printList(list);
+
+  insertAtPosition(list, 40, 3);
+
+  printList(list);
+
+  deleteFromBeginning(list);
+  deleteFromEnd(list);
+  deleteFromPosition(list, 2);
+
+  printList(list);
+
+  freeList(list);
+
+  return EXIT_SUCCESS;
 }
